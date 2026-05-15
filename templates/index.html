@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CouponRadar — Find Discount Codes Instantly</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #08090f;
+      --surface:   #111220;
+      --card:      #161728;
+      --border:    #25264a;
+      --primary:   #7c3aed;
+      --primary-l: #9d5bf5;
+      --accent:    #06b6d4;
+      --green:     #22c55e;
+      --text:      #e2e8f0;
+      --muted:     #64748b;
+      --radius:    14px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Background glow ───────────────────────────── */
+    .glow-orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .glow-orb-1 { width: 600px; height: 600px; background: rgba(124,58,237,.18); top: -200px; left: -150px; }
+    .glow-orb-2 { width: 500px; height: 500px; background: rgba(6,182,212,.12);  bottom: -150px; right: -100px; }
+
+    /* ── Layout ────────────────────────────────────── */
+    .page { position: relative; z-index: 1; }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 40px;
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(10px);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.2rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+    .logo-icon {
+      width: 34px; height: 34px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+    .logo span { background: linear-gradient(90deg, var(--primary-l), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+    .badge {
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: rgba(124,58,237,.2);
+      border: 1px solid rgba(124,58,237,.4);
+      color: var(--primary-l);
+      letter-spacing: 0.5px;
+    }
+
+    /* ── Hero ──────────────────────────────────────── */
+    .hero {
+      text-align: center;
+      padding: 80px 20px 60px;
+    }
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--primary-l);
+      margin-bottom: 20px;
+    }
+    .hero h1 {
+      font-size: clamp(2.2rem, 5vw, 3.6rem);
+      font-weight: 900;
+      line-height: 1.1;
+      letter-spacing: -1.5px;
+      margin-bottom: 16px;
+    }
+    .hero h1 .gradient {
+      background: linear-gradient(90deg, var(--primary-l) 0%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero p {
+      font-size: 1.05rem;
+      color: var(--muted);
+      max-width: 500px;
+      margin: 0 auto 40px;
+      line-height: 1.6;
+    }
+
+    /* ── Search box ────────────────────────────────── */
+    .search-wrap {
+      max-width: 620px;
+      margin: 0 auto;
+      position: relative;
+    }
+    .search-form {
+      display: flex;
+      gap: 10px;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      padding: 8px;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .search-form:focus-within {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(124,58,237,.2);
+    }
+    .search-icon {
+      display: flex; align-items: center; padding: 0 6px 0 10px;
+      color: var(--muted); font-size: 18px; flex-shrink: 0;
+    }
+    .search-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      font-size: 1rem;
+      font-family: inherit;
+      color: var(--text);
+      padding: 8px 0;
+    }
+    .search-input::placeholder { color: var(--muted); }
+    .search-btn {
+      flex-shrink: 0;
+      background: linear-gradient(135deg, var(--primary), #5b21b6);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 22px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: opacity .2s, transform .1s;
+      white-space: nowrap;
+    }
+    .search-btn:hover { opacity: .88; }
+    .search-btn:active { transform: scale(.97); }
+    .search-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+    .hint-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 16px;
+    }
+    .hint-tag {
+      font-size: 0.78rem;
+      padding: 4px 12px;
+      border-radius: 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      cursor: pointer;
+      transition: color .2s, border-color .2s;
+    }
+    .hint-tag:hover { color: var(--text); border-color: var(--primary); }
+
+    /* ── Results section ───────────────────────────── */
+    #results { max-width: 900px; margin: 0 auto; padding: 20px 20px 80px; }
+
+    .results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .results-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+    .results-count {
+      font-size: 0.8rem;
+      color: var(--muted);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 4px 12px;
+      border-radius: 20px;
+    }
+
+    /* ── Cards grid ────────────────────────────────── */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    .code-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: border-color .2s, transform .15s, box-shadow .2s;
+      animation: fadeUp .35s ease both;
+    }
+    .code-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(124,58,237,.15);
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .card-source {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: rgba(6,182,212,.12);
+      border: 1px solid rgba(6,182,212,.25);
+      padding: 3px 9px;
+      border-radius: 20px;
+      width: fit-content;
+    }
+
+    .card-desc {
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.5;
+      flex: 1;
+    }
+
+    .card-code-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(124,58,237,.1);
+      border: 1.5px dashed rgba(124,58,237,.4);
+      border-radius: 10px;
+      padding: 10px 14px;
+    }
+    .card-code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--primary-l);
+      flex: 1;
+      letter-spacing: 1px;
+    }
+    .copy-btn {
+      flex-shrink: 0;
+      background: rgba(124,58,237,.25);
+      border: 1px solid rgba(124,58,237,.4);
+      color: var(--primary-l);
+      border-radius: 7px;
+      padding: 5px 10px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background .2s, transform .1s;
+      white-space: nowrap;
+    }
+    .copy-btn:hover { background: rgba(124,58,237,.4); }
+    .copy-btn:active { transform: scale(.94); }
+    .copy-btn.copied {
+      background: rgba(34,197,94,.2);
+      border-color: rgba(34,197,94,.4);
+      color: var(--green);
+    }
+
+    /* ── Skeleton loader ───────────────────────────── */
+    .skeleton-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+    }
+    .skeleton-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .skeleton-line {
+      height: 14px;
+      background: linear-gradient(90deg, var(--surface) 25%, var(--border) 50%, var(--surface) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: 6px;
+    }
+    .skeleton-line.short { width: 40%; }
+    .skeleton-line.medium { width: 75%; }
+    .skeleton-line.tall { height: 44px; border-radius: 10px; }
+    @keyframes shimmer {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* ── States ────────────────────────────────────── */
+    .state-box {
+      text-align: center;
+      padding: 60px 20px;
+    }
+    .state-icon { font-size: 3rem; margin-bottom: 16px; }
+    .state-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
+    .state-sub { font-size: 0.9rem; color: var(--muted); line-height: 1.6; max-width: 380px; margin: 0 auto; }
+
+    /* ── Disclaimer ────────────────────────────────── */
+    .disclaimer {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: rgba(245,158,11,.08);
+      border: 1px solid rgba(245,158,11,.2);
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 0.8rem;
+      color: #fbbf24;
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+
+    /* ── Toast ─────────────────────────────────────── */
+    #toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--green);
+      color: #000;
+      font-weight: 700;
+      font-size: 0.85rem;
+      padding: 10px 22px;
+      border-radius: 30px;
+      box-shadow: 0 4px 20px rgba(0,0,0,.4);
+      transition: transform .3s cubic-bezier(.34,1.56,.64,1);
+      z-index: 999;
+      white-space: nowrap;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* ── Error banner ──────────────────────────────── */
+    .error-banner {
+      background: rgba(239,68,68,.1);
+      border: 1px solid rgba(239,68,68,.3);
+      color: #f87171;
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 0.88rem;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 600px) {
+      header { padding: 16px 20px; }
+      .hero { padding: 50px 16px 40px; }
+      .cards-grid, .skeleton-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="glow-orb glow-orb-1"></div>
+  <div class="glow-orb glow-orb-2"></div>
+
+  <div class="page">
+    <header>
+      <div class="logo">
+        <div class="logo-icon">🎟</div>
+        <span>CouponRadar</span>
+      </div>
+      <div class="badge">FREE · NO SIGN-UP</div>
+    </header>
+
+    <section class="hero">
+      <div class="hero-eyebrow">✦ Powered by live web search</div>
+      <h1>Find <span class="gradient">discount codes</span><br />for any store</h1>
+      <p>Enter any store name or website and we'll hunt down the best promo codes available right now.</p>
+
+      <div class="search-wrap">
+        <form class="search-form" id="searchForm" onsubmit="doSearch(event)">
+          <div class="search-icon">🔍</div>
+          <input
+            class="search-input"
+            id="storeInput"
+            type="text"
+            placeholder="e.g. Nike, Amazon, ASOS, Shein…"
+            autocomplete="off"
+            autocorrect="off"
+            spellcheck="false"
+            maxlength="120"
+          />
+          <button class="search-btn" type="submit" id="searchBtn">Find Codes</button>
+        </form>
+
+        <div class="hint-tags">
+          <span class="hint-tag" onclick="quickSearch('Nike')">Nike</span>
+          <span class="hint-tag" onclick="quickSearch('Amazon')">Amazon</span>
+          <span class="hint-tag" onclick="quickSearch('ASOS')">ASOS</span>
+          <span class="hint-tag" onclick="quickSearch('Shein')">Shein</span>
+          <span class="hint-tag" onclick="quickSearch('Adidas')">Adidas</span>
+          <span class="hint-tag" onclick="quickSearch('Booking.com')">Booking.com</span>
+        </div>
+      </div>
+    </section>
+
+    <div id="results"></div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script>
+    let searching = false;
+
+    function quickSearch(name) {
+      document.getElementById('storeInput').value = name;
+      doSearch(null);
+    }
+
+    async function doSearch(e) {
+      if (e) e.preventDefault();
+      if (searching) return;
+
+      const input = document.getElementById('storeInput');
+      const store = input.value.trim();
+      if (!store) { input.focus(); return; }
+
+      searching = true;
+      const btn = document.getElementById('searchBtn');
+      btn.disabled = true;
+      btn.textContent = 'Searching…';
+
+      showSkeleton();
+
+      try {
+        const res = await fetch('/api/search', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ store }),
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          showError(data.error || 'Something went wrong. Please try again.');
+          return;
+        }
+
+        renderResults(data);
+      } catch (err) {
+        showError('Network error. Is the server running?');
+      } finally {
+        searching = false;
+        btn.disabled = false;
+        btn.textContent = 'Find Codes';
+      }
+    }
+
+    function showSkeleton() {
+      const cards = Array.from({ length: 6 }, () => `
+        <div class="skeleton-card">
+          <div class="skeleton-line short"></div>
+          <div class="skeleton-line medium"></div>
+          <div class="skeleton-line"></div>
+          <div class="skeleton-line tall"></div>
+        </div>
+      `).join('');
+
+      document.getElementById('results').innerHTML = `
+        <div class="results-header">
+          <div class="skeleton-line short" style="width:200px;height:18px;border-radius:6px;background:var(--card)"></div>
+        </div>
+        <div class="skeleton-grid">${cards}</div>
+      `;
+    }
+
+    function showError(msg) {
+      document.getElementById('results').innerHTML = `<div class="error-banner">⚠ ${msg}</div>`;
+    }
+
+    function renderResults(data) {
+      const el = document.getElementById('results');
+
+      if (!data.codes || data.codes.length === 0) {
+        el.innerHTML = `
+          <div class="state-box">
+            <div class="state-icon">😔</div>
+            <div class="state-title">No codes found for "${data.store}"</div>
+            <div class="state-sub">
+              We couldn't find any public coupon codes right now.
+              Try checking the store's own website, or search for "${data.store} promo code" in your browser.
+            </div>
+          </div>`;
+        return;
+      }
+
+      const cards = data.codes.map((item, i) => `
+        <div class="code-card" style="animation-delay:${i * 40}ms">
+          <div class="card-source">🌐 ${esc(item.source || 'Web')}</div>
+          <div class="card-desc">${esc(item.description || 'Discount code')}</div>
+          <div class="card-code-wrap">
+            <div class="card-code" id="code-${i}">${esc(item.code)}</div>
+            <button class="copy-btn" id="btn-${i}" onclick="copyCode(${i}, '${esc(item.code)}')">Copy</button>
+          </div>
+        </div>
+      `).join('');
+
+      el.innerHTML = `
+        <div class="results-header">
+          <div class="results-title">Codes for <strong>${esc(data.store)}</strong></div>
+          <div class="results-count">${data.codes.length} code${data.codes.length !== 1 ? 's' : ''} found</div>
+        </div>
+        <div class="disclaimer">
+          ⚠ These codes are collected from public sources and may be expired, store-specific, or limited.
+          Always verify at checkout. Results are not guaranteed.
+        </div>
+        <div class="cards-grid">${cards}</div>
+      `;
+    }
+
+    function copyCode(i, code) {
+      navigator.clipboard.writeText(code).then(() => {
+        const btn = document.getElementById(`btn-${i}`);
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = 'Copy';
+          btn.classList.remove('copied');
+        }, 2000);
+        showToast(`Copied "${code}" to clipboard!`);
+      }).catch(() => {
+        // Fallback for older browsers
+        const el = document.getElementById(`code-${i}`);
+        const range = document.createRange();
+        range.selectNode(el);
+        window.getSelection().removeAllRanges();
+        window.getSelection().addRange(range);
+        document.execCommand('copy');
+        window.getSelection().removeAllRanges();
+        showToast(`Copied "${code}"!`);
+      });
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2500);
+    }
+
+    function esc(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    // Allow Enter key from anywhere
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && document.activeElement !== document.getElementById('storeInput')) return;
+    });
+  </script>
+</body>
+</html>
