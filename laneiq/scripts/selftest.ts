@@ -1,6 +1,7 @@
 import { CHAMPIONS, CHAMPION_LIST, ALL_RUNES } from '../src/data'
 import { evaluateMatchup, recommend } from '../src/engine/matchup'
 import { buildRunePage } from '../src/engine/runes'
+import { buildGamePlan } from '../src/engine/gameplan'
 import type { Lane, Profile } from '../src/types'
 
 const LANES: Lane[] = ['TOP', 'JNG', 'MID', 'ADC', 'SUP']
@@ -21,6 +22,13 @@ for (const me of CHAMPION_LIST) {
     for (const foe of CHAMPION_LIST.slice(0, 40)) {
       if (me.id === foe.id) continue
       try {
+        const plan = buildGamePlan(me, foe, lane)
+        if (!plan.thesis || plan.phases.length < 4) errors.push(`${me.id}/${foe.id}/${lane}: thin plan`)
+        for (const t of [plan.thesis, plan.wave, plan.trading, plan.winCondition, plan.lossCondition,
+                         ...plan.phases.map(x => x.text), ...plan.respect]) {
+          if (/undefined|NaN|\[object/.test(t)) errors.push(`${me.id}/${foe.id}/${lane}: bad text "${t.slice(0,60)}"`)
+          if (/every 0s|every 1s/.test(t)) errors.push(`${me.id}/${foe.id}/${lane}: quoted a zero cooldown`)
+        }
         const p = buildRunePage(me, foe, lane)
         pages++
         const ids = p.lcu.selectedPerkIds
@@ -41,7 +49,7 @@ wrs.sort((a, b) => a - b)
 const q = (p: number) => wrs[Math.floor(wrs.length * p)].toFixed(1)
 console.log(`matchups evaluated : ${wrs.length}`)
 console.log(`win-rate spread    : min ${q(0)} / p05 ${q(0.05)} / median ${q(0.5)} / p95 ${q(0.95)} / max ${wrs[wrs.length-1].toFixed(1)}`)
-console.log(`rune pages built   : ${pages}`)
+console.log(`plans + pages built: ${pages}`)
 console.log(`errors             : ${errors.length}`)
 errors.slice(0, 15).forEach(e => console.log('  !', e))
 

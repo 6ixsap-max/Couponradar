@@ -19,6 +19,11 @@ That record is what makes the recommendation yours rather than a generic tier li
 projected win rate, a laning-phase bar, a mid/late-game bar, and plain-English reasons for
 and against. It also suggests strong champions that are *not* in your pool yet.
 
+**Lane plan** — for every pick, a game plan written from the same model: the shape of the
+lane in one line, what to do at levels 1-2, 3-5, 6 and in the mid game, how to manage the
+wave, which enemy cooldown to trade around (named, with its rank-1 cooldown out of Riot's
+data), what to respect, and the explicit win and loss condition.
+
 **Runes** — a matchup-aware rune page for the pick, every rune with a one-line reason, plus
 summoner spells and build adjustments. One button sends it to your League client.
 
@@ -89,6 +94,14 @@ reliance, burst threat, wave control, damage type, early tempo, scaling, anti-ta
 utility, map pressure. Term weights change per lane: wave clear barely matters in support,
 scaling matters most for ADCs, all-in matters most in top lane.
 
+`src/engine/gameplan.ts` turns the same comparison into instructions. It picks one of eight
+lane archetypes (bully the early game, poke them off the wave, survive to your spike, short
+trades then commit, win the lane somewhere else, hold lane win the side, respect a losing
+matchup, press a winning one), then writes each phase from the edges that produced it.
+Ability names and cooldowns come from Data Dragon's full champion data; charge-based and
+passive abilities report a meaningless cooldown of 0 or 1 and are filtered out rather than
+quoted. Jungle and support get their own plan shapes, since neither is really a lane.
+
 `src/engine/counters.ts` adds specific lane dynamics the numbers cannot see — a spell shield
 blanking a hook, suppression beating a dash, true damage ignoring a parry.
 
@@ -115,6 +128,7 @@ If you have real matchup data, `evaluateMatchup` is the single place to blend it
 ```
 src/engine/matchup.ts     the thirteen-term matchup model
 src/engine/counters.ts    curated lane dynamics
+src/engine/gameplan.ts    the lane plan: phases, waves, cooldowns, win conditions
 src/engine/runes.ts       matchup-aware rune, spell and item logic
 scripts/champion_db.py    the hand-maintained champion knowledge base
 scripts/build_data.py     Data Dragon + knowledge base -> src/data/*.json
@@ -154,8 +168,9 @@ npx esbuild scripts/selftest.ts --bundle --platform=node --format=cjs \
   --outfile=/tmp/selftest.cjs && node /tmp/selftest.cjs
 ```
 
-Checks all 29,756 matchups for sane output and builds 34,400 rune pages, asserting that every
-rune id exists, trees never collide and no page has duplicates.
+Checks all 29,756 matchups for sane output and builds 34,400 lane plans and rune pages,
+asserting that every rune id exists, trees never collide, no page has duplicates, no plan is
+thin, and that no plan ever quotes a zero-second cooldown.
 
 ---
 

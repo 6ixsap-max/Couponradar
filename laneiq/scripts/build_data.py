@@ -72,6 +72,7 @@ def clamp(x, lo=0.02, hi=0.99):
 def build_champions():
     dd = json.load(open(os.path.join(RAW, "champion.json")))
     patch = dd["version"]
+    full = json.load(open(os.path.join(RAW, "championFull.json")))["data"]
     out = {}
     unknown = sorted(set(dd["data"]) - set(CHAMPIONS))
     if unknown:
@@ -96,8 +97,19 @@ def build_champions():
         vec = {k: clamp(v) for k, v in vec.items()}
         for k in FEATURES:
             vec.setdefault(k, .4)
+        fc = full.get(cid, {})
+        spells = []
+        for key, sp in zip("QWER", fc.get("spells", [])):
+            spells.append({
+                "k": key,
+                "n": sp.get("name", ""),
+                "cd": (sp.get("cooldown") or [0])[0],
+                "r": (sp.get("range") or [0])[0],
+            })
         out[cid] = {
             "id": cid,
+            "passive": (fc.get("passive") or {}).get("name", ""),
+            "spells": spells,
             "key": int(c["key"]),
             "name": c["name"],
             "title": c["title"],

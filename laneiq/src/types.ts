@@ -8,8 +8,12 @@ export interface Features {
   safety: number; splitpush: number; roam: number
 }
 
+export interface Spell { k: 'Q' | 'W' | 'E' | 'R'; n: string; cd: number; r: number }
+
 export interface Champion {
   id: string
+  passive: string
+  spells: Spell[]
   key: number
   name: string
   title: string

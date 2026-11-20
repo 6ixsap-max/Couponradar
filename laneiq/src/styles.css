@@ -267,3 +267,51 @@ input[type=range] { accent-color: var(--teal); width: 100%; }
   .bridge-pill { order: 2; margin-left: auto; }
   .wr-num { font-size: 1.2rem; }
 }
+
+/* ---------------------------------------------------------------- game plan */
+.plan { margin-top: 16px; border-top: 1px dashed var(--line); padding-top: 16px; }
+.plan-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+.plan-head h4 { margin: 0; }
+.plan-head .btn { margin-left: auto; }
+.archetype {
+  font-size: .68rem; text-transform: uppercase; letter-spacing: .09em; font-weight: 700;
+  background: rgba(10,200,185,.12); color: var(--teal); border: 1px solid rgba(10,200,185,.32);
+  padding: 3px 9px; border-radius: 20px;
+}
+.thesis {
+  font-size: .95rem; line-height: 1.6; color: #dbe5f5; margin: 0 0 14px;
+  border-left: 2px solid var(--gold); padding-left: 13px;
+}
+.phases { list-style: none; counter-reset: ph; margin: 0 0 14px; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.phases li {
+  counter-increment: ph; position: relative; padding: 9px 0 9px 34px;
+  border-bottom: 1px solid rgba(34,48,77,.5);
+}
+.phases li:last-child { border-bottom: 0; }
+.phases li::before {
+  content: counter(ph); position: absolute; left: 0; top: 10px;
+  width: 22px; height: 22px; border-radius: 50%; background: #0a1020; border: 1px solid var(--line);
+  color: var(--muted); font-size: .7rem; font-weight: 700; display: grid; place-items: center;
+}
+.phase-label {
+  display: block; font-size: .68rem; text-transform: uppercase; letter-spacing: .1em;
+  color: var(--gold); margin-bottom: 3px;
+}
+.phases p { margin: 0; font-size: .88rem; color: #c3cfe4; line-height: 1.58; }
+.plan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+.plan-box { background: #0a1020; border: 1px solid var(--line); border-radius: 11px; padding: 12px 14px; }
+.plan-box + .plan-box { margin-top: 0; }
+.plan-box h5 { color: var(--gold); font-size: .68rem; text-transform: uppercase; letter-spacing: .1em; margin-bottom: 6px; }
+.plan-box p { margin: 0; font-size: .85rem; color: #c3cfe4; line-height: 1.55; }
+.respect { margin: 0; padding-left: 17px; font-size: .85rem; color: #c3cfe4; display: flex; flex-direction: column; gap: 5px; }
+.respect li::marker { color: var(--bad); }
+.conditions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+.cond { padding: 11px 13px; border-radius: 11px; border: 1px solid var(--line); font-size: .85rem; line-height: 1.5; }
+.cond b { display: block; font-size: .68rem; text-transform: uppercase; letter-spacing: .1em; margin-bottom: 4px; }
+.cond.win { background: rgba(63,207,142,.07); border-color: rgba(63,207,142,.28); }
+.cond.win b { color: var(--good); }
+.cond.lose { background: rgba(242,102,122,.07); border-color: rgba(242,102,122,.28); }
+.cond.lose b { color: var(--bad); }
+@media (max-width: 760px) {
+  .plan-grid, .conditions { grid-template-columns: 1fr; }
+}

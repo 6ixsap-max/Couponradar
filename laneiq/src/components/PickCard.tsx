@@ -2,7 +2,9 @@ import { useState } from 'react'
 import { champIcon } from '../data'
 import type { Champion, Lane, Pick } from '../types'
 import { buildRunePage } from '../engine/runes'
+import { buildGamePlan } from '../engine/gameplan'
 import { RunePanel } from './RunePanel'
+import { GamePlanPanel } from './GamePlanPanel'
 
 const pct = (n: number) => `${n.toFixed(1)}%`
 
@@ -48,6 +50,7 @@ export function PickCard({ pick, foe, lane, rank, bridgeReady }: {
             <span>Your history moves it <b>{pick.comfortDelta >= 0 ? '+' : ''}{pick.comfortDelta.toFixed(1)}</b> points</span>
             <span>Confidence: <b className={`conf-${pick.confidence}`}>{pick.confidence}</b></span>
           </div>
+          <GamePlanPanel plan={buildGamePlan(pick.champion, foe, lane)} me={pick.champion} foe={foe} />
           <RunePanel page={buildRunePage(pick.champion, foe, lane)} bridgeReady={bridgeReady} />
         </div>
       )}
