@@ -133,6 +133,20 @@ npm run data
 New champions will be missing from `scripts/champion_db.py` — the build fails loudly until
 you add them, which is deliberate.
 
+### Hosted builds without Riot's CDN
+
+Some sandboxes block remote images. `scripts/build_icons.py` inlines every champion and rune
+icon into `src/data/icons.json` as compressed WebP data URIs (about 470 KB for all 240), which
+the app prefers over the CDN when present:
+
+```bash
+python3 scripts/build_icons.py     # fill it — needs raw/img, see the script header
+npm run build
+python3 scripts/build_icons.py --clear
+```
+
+It ships empty, so a normal build loads icons from Data Dragon as usual.
+
 ### Self-test
 
 ```bash

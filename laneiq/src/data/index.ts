@@ -1,5 +1,6 @@
 import championsRaw from './champions.json'
 import runesRaw from './runes.json'
+import iconsRaw from './icons.json'
 import type { Champion } from '../types'
 
 export const PATCH: string = (championsRaw as any).patch
@@ -13,10 +14,19 @@ export interface RuneTree { id: number; key: string; name: string; icon: string;
 export const RUNE_TREES: Record<string, RuneTree> = (runesRaw as any).trees
 
 export const DDRAGON = `https://ddragon.leagueoflegends.com/cdn/${PATCH}`
-export const champIcon = (id: string) => `${DDRAGON}/img/champion/${id}.png`
-export const champSplash = (id: string) =>
-  `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${id}_0.jpg`
-export const runeIcon = (icon: string) =>
+
+/**
+ * Icons normally come straight from Data Dragon. A build that has to run
+ * somewhere Riot's CDN is unreachable can inline them instead — see
+ * scripts/build_icons.py. Empty by default.
+ */
+const LOCAL_ICONS = iconsRaw as { champions: Record<string, string>; runes: Record<string, string> }
+export const ICONS_INLINED = Object.keys(LOCAL_ICONS.champions).length > 0
+
+export const champIcon = (id: string) =>
+  LOCAL_ICONS.champions[id] ?? `${DDRAGON}/img/champion/${id}.png`
+export const runeIcon = (icon: string, id?: number | string) =>
+  (id !== undefined && LOCAL_ICONS.runes[String(id)]) ||
   `https://ddragon.leagueoflegends.com/cdn/img/${icon}`
 
 export const ALL_RUNES: Record<number, RuneDef & { tree: string }> = (() => {

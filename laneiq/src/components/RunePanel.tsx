@@ -3,6 +3,9 @@ import { runeIcon } from '../data'
 import type { RunePage } from '../engine/runes'
 import { applyRunes } from '../lib/bridge'
 
+const HOSTED = typeof location !== 'undefined' &&
+  !['localhost', '127.0.0.1', ''].includes(location.hostname)
+
 export function RunePanel({ page, bridgeReady }: { page: RunePage; bridgeReady: boolean }) {
   const [state, setState] = useState<'idle' | 'sending' | 'done' | 'error'>('idle')
   const [msg, setMsg] = useState('')
@@ -28,8 +31,12 @@ export function RunePanel({ page, bridgeReady }: { page: RunePage; bridgeReady: 
       </div>
       {!bridgeReady && (
         <p className="hint">
-          Start the local bridge (<code>npm run bridge</code>) with League open to import with one click.
-          Until then the page below is the manual setup.
+          {HOSTED
+            ? <>This is the hosted preview, and a hosted page is not allowed to reach your own machine.
+                One-click import works when you run LaneIQ locally with the bridge — everything below is
+                the page to set up by hand in the meantime.</>
+            : <>Start the local bridge (<code>npm run bridge</code>) with League open to import with one
+                click. Until then the page below is the manual setup.</>}
         </p>
       )}
       {msg && <p className={state === 'error' ? 'err' : 'ok'}>{msg}</p>}
@@ -76,7 +83,7 @@ export function RunePanel({ page, bridgeReady }: { page: RunePage; bridgeReady: 
 function RuneRow({ r, keystone }: { r: { id: number; name: string; icon: string; why: string }; keystone?: boolean }) {
   return (
     <div className={`rune-row${keystone ? ' is-keystone' : ''}`}>
-      <img src={runeIcon(r.icon)} alt={r.name} loading="lazy" />
+      <img src={runeIcon(r.icon, r.id)} alt={r.name} loading="lazy" />
       <div>
         <b>{r.name}</b>
         <span>{r.why}</span>
