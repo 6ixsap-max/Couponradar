@@ -1,1 +1,0 @@
-{"root":["./src/App.tsx","./src/main.tsx","./src/types.ts","./src/components/ChampionSearch.tsx","./src/components/PickCard.tsx","./src/components/PoolEditor.tsx","./src/components/RunePanel.tsx","./src/data/index.ts","./src/engine/counters.ts","./src/engine/matchup.ts","./src/engine/runes.ts","./src/lib/bridge.ts","./src/lib/store.ts"],"version":"5.9.3"}
